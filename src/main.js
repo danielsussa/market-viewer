@@ -106,6 +106,29 @@ function normalizeCandles(payload) {
   return rows
 }
 
+function resolveGridVisibility(payload) {
+  const grid = payload?.grid && typeof payload.grid === 'object' ? payload.grid : {}
+
+  const parseBool = (value) => {
+    if (typeof value === 'boolean') return value
+    if (typeof value === 'number') return value !== 0
+    if (typeof value === 'string') {
+      const v = value.trim().toLowerCase()
+      if (['1', 'true', 'yes', 'on', 'sim'].includes(v)) return true
+      if (['0', 'false', 'no', 'off', 'nao', 'não'].includes(v)) return false
+    }
+    return null
+  }
+
+  const vertical = parseBool(grid.vertical ?? grid.vertLines ?? payload?.gridVertical)
+  const horizontal = parseBool(grid.horizontal ?? grid.horzLines ?? payload?.gridHorizontal)
+
+  return {
+    vertical: vertical ?? false,
+    horizontal: horizontal ?? false,
+  }
+}
+
 function clearObjectsLayer() {
   if (!objectsLayerEl) return
   objectsLayerEl.innerHTML = ''
@@ -313,6 +336,7 @@ function run() {
   const payload = JSON.parse(decoded)
 
   const rows = normalizeCandles(payload)
+  const gridVisibility = resolveGridVisibility(payload)
 
   const title = String(payload?.title || payload?.symbol || 'Market Viewer')
   titleEl.textContent = title
@@ -322,7 +346,10 @@ function run() {
     width: Math.max(320, chartEl.clientWidth),
     height: Math.max(320, chartEl.clientHeight),
     layout: { background: { color: '#0b0f14' }, textColor: '#b8c7da' },
-    grid: { vertLines: { visible: false }, horzLines: { visible: false } },
+    grid: {
+      vertLines: { visible: gridVisibility.vertical },
+      horzLines: { visible: gridVisibility.horizontal },
+    },
     crosshair: {
       vertLine: {
         color: 'rgba(184, 199, 218, 0.18)',

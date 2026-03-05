@@ -118,7 +118,24 @@
 }</pre>
     </div>
 
-    <h2>4) Receita para bots de IA (passo a passo)</h2>
+    <h2>4) Grid horizontal e vertical (opcional)</h2>
+    <div class="card">
+      <p>Você pode ligar/desligar o grid diretamente no payload:</p>
+      <pre>{
+  "grid": {
+    "vertical": true,
+    "horizontal": false
+  }
+}</pre>
+      <p>Aliases também aceitos:</p>
+      <ul>
+        <li><code>grid.vertLines</code> e <code>grid.horzLines</code></li>
+        <li><code>gridVertical</code> e <code>gridHorizontal</code> na raiz</li>
+      </ul>
+      <p>Valores aceitos: boolean, <code>1/0</code>, <code>true/false</code>, <code>yes/no</code>, <code>on/off</code>, <code>sim/não</code>.</p>
+    </div>
+
+    <h2>5) Receita para bots de IA (passo a passo)</h2>
     <div class="card">
       <ol>
         <li>Gerar JSON válido com <code>candles</code>.</li>
@@ -131,7 +148,7 @@
       <p class="ok">Dica: evite payload gigantesco em query string. Se passar do limite do navegador/proxy, reduza candles.</p>
     </div>
 
-    <h2>5) Exemplo em JavaScript (Node/browser)</h2>
+    <h2>6) Exemplo em JavaScript (Node/browser)</h2>
     <div class="card">
       <pre>const payload = {
   title: "WINJ26",
@@ -139,6 +156,7 @@
     { time: "2026-03-05T13:10:00Z", open: 131150, high: 131220, low: 131120, close: 131205 },
     { time: "2026-03-05T13:11:00Z", open: 131205, high: 131240, low: 131180, close: 131210 }
   ],
+  grid: { vertical: true, horizontal: true },
   objects: [
     { type: "buy-arrow", time: "2026-03-05T13:11:00Z", label: "Entrada" }
   ]
@@ -150,7 +168,7 @@ const url = `http://localhost:5173/?payload=${b64url}`
 console.log(url)</pre>
     </div>
 
-    <h2>6) Exemplo em Python</h2>
+    <h2>7) Exemplo em Python</h2>
     <div class="card">
       <pre>import json, base64
 
@@ -159,7 +177,8 @@ payload = {
   "candles": [
     {"time": "2026-03-05T13:10:00Z", "open": 131150, "high": 131220, "low": 131120, "close": 131205},
     {"time": "2026-03-05T13:11:00Z", "open": 131205, "high": 131240, "low": 131180, "close": 131210}
-  ]
+  ],
+  "grid": {"vertical": True, "horizontal": False}
 }
 
 raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
@@ -168,20 +187,21 @@ url = f"http://localhost:5173/?payload={b64url}"
 print(url)</pre>
     </div>
 
-    <h2>7) Exemplo em shell (jq + base64)</h2>
+    <h2>8) Exemplo em shell (jq + base64)</h2>
     <div class="card">
       <pre>PAYLOAD=$(jq -nc '{
   title:"WINJ26",
   candles:[
     {time:"2026-03-05T13:10:00Z",open:131150,high:131220,low:131120,close:131205},
     {time:"2026-03-05T13:11:00Z",open:131205,high:131240,low:131180,close:131210}
-  ]
+  ],
+  grid:{vertical:true,horizontal:false}
 }' | base64 | tr -d '\n' | tr '+/' '-_' | tr -d '=')
 
 open "http://localhost:5173/?payload=${PAYLOAD}"</pre>
     </div>
 
-    <h2>8) Erros comuns</h2>
+    <h2>9) Erros comuns</h2>
     <div class="card">
       <ul>
         <li><strong>“query param payload é obrigatório”</strong>: faltou <code>?payload=...</code>.</li>
@@ -192,7 +212,7 @@ open "http://localhost:5173/?payload=${PAYLOAD}"</pre>
       <p>Se você está automatizando com IA, sempre valide o JSON antes de montar a URL.</p>
     </div>
 
-    <p style="margin-top:26px; color:#7f95ae;">Atalho: clique em <span class="kbd">/help</span> na tela principal para abrir esta documentação.</p>
+    <p style="margin-top:26px; color:#7f95ae;">Dica: acesse diretamente <span class="kbd">/help/</span> para abrir esta documentação.</p>
   </main>
 </body>
 </html>

@@ -44,6 +44,26 @@ Também aceita:
 - `open/high/low/close` no lugar de `o/h/l/c`
 - `time` opcional (unix sec/ms ou ISO). Se não vier, usa sequência por minuto.
 - `objects` (lista de objetos para sobrepor no chart)
+- `grid` para ligar/desligar grid horizontal/vertical
+
+### Grid (opcional)
+
+Você pode controlar linhas do grid via payload:
+
+```json
+{
+  "grid": {
+    "vertical": true,
+    "horizontal": false
+  }
+}
+```
+
+Também aceita aliases:
+- `grid.vertLines` e `grid.horzLines`
+- `gridVertical` e `gridHorizontal` na raiz do payload
+
+Valores aceitos: boolean, `1/0`, `true/false`, `yes/no`, `on/off`, `sim/não`.
 
 ### Objects (overlay)
 
