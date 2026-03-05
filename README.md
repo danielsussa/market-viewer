@@ -1,32 +1,32 @@
 # Market Viewer (Front-only)
 
-Viewer de candles totalmente em frontend, sem backend.
+A fully frontend candlestick viewer (no backend required).
 
-## Documentação para bots/IA
+## Documentation for bots/AI
 
-- Acesse **`/help/`** para instruções completas de como gerar a URL com `?payload=...`.
-- A página inclui formato aceito, validações, erros comuns e exemplos em JavaScript, Python e shell.
+- Open **`/help/`** for full instructions on generating URLs with `?payload=...`.
+- The help page includes accepted formats, validations, common errors, and examples in JavaScript, Python, and shell.
 
 ## Stack
 
 - Vite
 - lightweight-charts
 
-## Rodar local
+## Run locally
 
 ```bash
-cd /Users/danielkanczuk/Documents/projects/ewz-wdo-win-bova/market-viewer
+cd /Users/danielkanczuk/Documents/projects/market-viewer
 npm install
 npm run dev
 ```
 
-Abra no navegador a URL do Vite com `?payload=...`.
+Then open the Vite URL with `?payload=...`.
 
-Também é possível abrir `http://localhost:5173/help/` para ver a documentação completa.
+You can also open `http://localhost:5173/help/` for the complete documentation.
 
-## Payload aceito
+## Accepted payload
 
-Compatível com o formato combinado:
+Compatible with this format:
 
 ```json
 {
@@ -38,17 +38,17 @@ Compatível com o formato combinado:
 }
 ```
 
-Também aceita:
+Also accepted:
 
-- `candles` no lugar de `candes`
-- `open/high/low/close` no lugar de `o/h/l/c`
-- `time` opcional (unix sec/ms ou ISO). Se não vier, usa sequência por minuto.
-- `objects` (lista de objetos para sobrepor no chart)
-- `grid` para ligar/desligar grid horizontal/vertical
+- `candles` instead of `candes`
+- `open/high/low/close` instead of `o/h/l/c`
+- optional `time` (unix sec/ms or ISO). If missing, the app uses 1-minute sequential timestamps.
+- `objects` (list of overlays to render on the chart)
+- `grid` to enable/disable horizontal and vertical grid lines
 
-### Grid (opcional)
+### Grid (optional)
 
-Você pode controlar linhas do grid via payload:
+You can configure grid lines through the payload:
 
 ```json
 {
@@ -59,15 +59,15 @@ Você pode controlar linhas do grid via payload:
 }
 ```
 
-Também aceita aliases:
-- `grid.vertLines` e `grid.horzLines`
-- `gridVertical` e `gridHorizontal` na raiz do payload
+Supported aliases:
+- `grid.vertLines` and `grid.horzLines`
+- `gridVertical` and `gridHorizontal` at payload root level
 
-Valores aceitos: boolean, `1/0`, `true/false`, `yes/no`, `on/off`, `sim/não`.
+Accepted values: boolean, `1/0`, `true/false`, `yes/no`, `on/off`.
 
 ### Objects (overlay)
 
-Estrutura inicial suportada:
+Supported object structures:
 
 ```json
 {
@@ -75,7 +75,7 @@ Estrutura inicial suportada:
   "time": "2026-03-05T13:10:00Z",
   "color": "#ffcc00",
   "width": 2,
-  "label": "Abertura NY",
+  "label": "NY Open",
   "labelColor": "#fff7cc"
 }
 ```
@@ -86,7 +86,7 @@ Estrutura inicial suportada:
   "price": 131200,
   "color": "#78c8ff",
   "width": 2,
-  "label": "Nível",
+  "label": "Level",
   "labelColor": "#dcf0ff"
 }
 ```
@@ -94,7 +94,7 @@ Estrutura inicial suportada:
 ```json
 {
   "type": "text",
-  "text": "Zona de atenção",
+  "text": "Attention zone",
   "time": "2026-03-05T13:18:00Z",
   "price": 131205,
   "color": "#eef1f8",
@@ -109,7 +109,7 @@ Estrutura inicial suportada:
 {
   "type": "buy-arrow",
   "time": "2026-03-05T13:18:00Z",
-  "label": "Compra",
+  "label": "Buy",
   "color": "#2ed573",
   "size": 1.2
 }
@@ -119,38 +119,38 @@ Estrutura inicial suportada:
 {
   "type": "sell-arrow",
   "time": "2026-03-05T13:24:00Z",
-  "label": "Venda",
+  "label": "Sell",
   "color": "#ff6b6b",
   "size": 1.2
 }
 ```
 
-Campos:
-- `type`: `vertical-line`, `horizontal-line`, `text`, `buy-arrow` ou `sell-arrow`
-- `time`: posição da linha (ISO, unix sec ou unix ms)
-- `price`: preço da linha horizontal
-- `color` (opcional): cor da linha
-- `width` (opcional): espessura da linha em px
-- `label` (opcional): texto no topo da linha
-- `labelColor` (opcional): cor do texto do label
+Fields:
+- `type`: `vertical-line`, `horizontal-line`, `text`, `buy-arrow`, or `sell-arrow`
+- `time`: line/marker position (ISO, unix sec, or unix ms)
+- `price`: horizontal line price
+- `color` (optional): line color
+- `width` (optional): line thickness in px
+- `label` (optional): top label text
+- `labelColor` (optional): label text color
 
-Campos específicos do `text`:
-- `text`: conteúdo do texto
-- posição pode ser:
-  - por mercado: `time` + `price`
-  - por pixel absoluto: `x` + `y`
-- `background` (opcional)
-- `fontSize` (opcional)
-- `offsetX` / `offsetY` (opcional)
+`text`-specific fields:
+- `text`: text content
+- position can be either:
+  - market coordinates: `time` + `price`
+  - absolute pixel coordinates: `x` + `y`
+- `background` (optional)
+- `fontSize` (optional)
+- `offsetX` / `offsetY` (optional)
 
-Campos específicos de `buy-arrow` / `sell-arrow`:
-- render nativo via lightweight-charts `createSeriesMarkers`
-- âncora no candle do `time` (não usa `price` exato, nem `x/y`)
-- `label` (opcional): texto do marker
-- `color` (opcional)
-- `size` (opcional): escala da seta
+`buy-arrow` / `sell-arrow` specific fields:
+- native rendering via lightweight-charts `createSeriesMarkers`
+- anchored to candle `time` (does not use exact `price`, nor `x/y`)
+- `label` (optional): marker text
+- `color` (optional)
+- `size` (optional): arrow scale
 
-## Exemplo de URL
+## URL example
 
 ```bash
 PAYLOAD=$(jq -nc '{

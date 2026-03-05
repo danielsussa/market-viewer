@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,10 +27,9 @@
       margin: 0 auto;
       padding: 28px 18px 60px;
     }
-    h1, h2, h3 { margin: 0 0 10px; line-height: 1.2; }
+    h1, h2 { margin: 0 0 10px; line-height: 1.2; }
     h1 { font-size: 28px; }
     h2 { margin-top: 30px; font-size: 22px; }
-    h3 { margin-top: 20px; font-size: 17px; }
     p, li { color: var(--muted); }
     a { color: var(--accent); }
     .card {
@@ -64,24 +63,24 @@
 </head>
 <body>
   <main class="wrap">
-    <p><a href="/">← voltar para o chart</a></p>
-    <h1>Help: como gerar a URL do Market Viewer</h1>
+    <p><a href="/">← back to chart</a></p>
+    <h1>Help: how to generate a Market Viewer URL</h1>
     <p>
-      Esta página explica o formato completo para montar o parâmetro
-      <code>?payload=...</code>. O objetivo é facilitar consumo por bots/agents de IA
-      que geram relatórios e snapshots de mercado.
+      This page explains the complete format for the <code>?payload=...</code>
+      query parameter. It is designed for automation use-cases, including AI
+      bots/agents that generate reports and market snapshots.
     </p>
 
-    <h2>1) Formato da URL</h2>
+    <h2>1) URL format</h2>
     <div class="card">
-      <pre>https://SEU_DOMINIO/?payload=ENCODED_PAYLOAD</pre>
+      <pre>https://YOUR_DOMAIN/?payload=ENCODED_PAYLOAD</pre>
       <p>
-        O app aceita payload em <strong>JSON raw</strong>, <strong>URL encoded</strong>,
-        <strong>base64</strong> ou <strong>base64url</strong>. Recomendado: base64url (mais robusto para query string).
+        The app accepts payload as <strong>raw JSON</strong>, <strong>URL encoded</strong>,
+        <strong>base64</strong>, or <strong>base64url</strong>. Recommended: base64url (safer for query strings).
       </p>
     </div>
 
-    <h2>2) Estrutura mínima do JSON</h2>
+    <h2>2) Minimum JSON structure</h2>
     <div class="card">
       <pre>{
   "title": "WINJ26",
@@ -91,64 +90,64 @@
   ]
 }</pre>
       <ul>
-        <li><code>title</code> opcional (fallback: <code>symbol</code> ou “Market Viewer”).</li>
-        <li><code>candles</code> ou <code>candes</code> (ambos aceitos).</li>
-        <li>OHLC pode ser <code>open/high/low/close</code> ou <code>o/h/l/c</code>.</li>
-        <li><code>time</code> opcional: ISO, unix sec ou unix ms. Sem <code>time</code>, usa sequência por minuto.</li>
+        <li><code>title</code> is optional (fallback: <code>symbol</code> or “Market Viewer”).</li>
+        <li><code>candles</code> or <code>candes</code> are both supported.</li>
+        <li>OHLC can be <code>open/high/low/close</code> or <code>o/h/l/c</code>.</li>
+        <li><code>time</code> is optional: ISO, unix sec, or unix ms. If missing, minute-by-minute sequence is generated.</li>
       </ul>
     </div>
 
-    <h2>3) Objetos extras (objects)</h2>
+    <h2>3) Overlay objects (objects)</h2>
     <div class="card">
-      <p>Tipos suportados:</p>
+      <p>Supported types:</p>
       <ul>
-        <li><code>vertical-line</code> (linha vertical em um tempo)</li>
-        <li><code>horizontal-line</code> (linha horizontal em um preço)</li>
-        <li><code>text</code> (rótulo em <code>time+price</code> ou em <code>x+y</code>)</li>
-        <li><code>buy-arrow</code> / <code>sell-arrow</code> (setas nativas do chart)</li>
+        <li><code>vertical-line</code> (vertical line at a given time)</li>
+        <li><code>horizontal-line</code> (horizontal line at a given price)</li>
+        <li><code>text</code> (label at <code>time+price</code> or absolute <code>x+y</code>)</li>
+        <li><code>buy-arrow</code> / <code>sell-arrow</code> (native chart markers)</li>
       </ul>
       <pre>{
   "objects": [
-    { "type": "vertical-line", "time": "2026-03-05T13:10:00Z", "label": "Abertura NY", "color": "#ffcc00" },
-    { "type": "horizontal-line", "price": 131200, "label": "Nível", "color": "#78c8ff" },
-    { "type": "text", "text": "Zona de atenção", "time": "2026-03-05T13:18:00Z", "price": 131205 },
-    { "type": "buy-arrow", "time": "2026-03-05T13:18:00Z", "label": "Compra" },
-    { "type": "sell-arrow", "time": "2026-03-05T13:24:00Z", "label": "Venda" }
+    { "type": "vertical-line", "time": "2026-03-05T13:10:00Z", "label": "NY Open", "color": "#ffcc00" },
+    { "type": "horizontal-line", "price": 131200, "label": "Level", "color": "#78c8ff" },
+    { "type": "text", "text": "Attention zone", "time": "2026-03-05T13:18:00Z", "price": 131205 },
+    { "type": "buy-arrow", "time": "2026-03-05T13:18:00Z", "label": "Buy" },
+    { "type": "sell-arrow", "time": "2026-03-05T13:24:00Z", "label": "Sell" }
   ]
 }</pre>
     </div>
 
-    <h2>4) Grid horizontal e vertical (opcional)</h2>
+    <h2>4) Horizontal and vertical grid (optional)</h2>
     <div class="card">
-      <p>Você pode ligar/desligar o grid diretamente no payload:</p>
+      <p>You can enable/disable grid lines in payload:</p>
       <pre>{
   "grid": {
     "vertical": true,
     "horizontal": false
   }
 }</pre>
-      <p>Aliases também aceitos:</p>
+      <p>Also supported aliases:</p>
       <ul>
-        <li><code>grid.vertLines</code> e <code>grid.horzLines</code></li>
-        <li><code>gridVertical</code> e <code>gridHorizontal</code> na raiz</li>
+        <li><code>grid.vertLines</code> and <code>grid.horzLines</code></li>
+        <li><code>gridVertical</code> and <code>gridHorizontal</code> at root level</li>
       </ul>
-      <p>Valores aceitos: boolean, <code>1/0</code>, <code>true/false</code>, <code>yes/no</code>, <code>on/off</code>, <code>sim/não</code>.</p>
+      <p>Accepted values: boolean, <code>1/0</code>, <code>true/false</code>, <code>yes/no</code>, <code>on/off</code>.</p>
     </div>
 
-    <h2>5) Receita para bots de IA (passo a passo)</h2>
+    <h2>5) AI bot generation recipe</h2>
     <div class="card">
       <ol>
-        <li>Gerar JSON válido com <code>candles</code>.</li>
-        <li>Validar OHLC por candle: <code>low ≤ min(open,close)</code> e <code>high ≥ max(open,close)</code>.</li>
-        <li>Ordenar candles por tempo crescente.</li>
-        <li>Serializar JSON sem quebras desnecessárias.</li>
-        <li>Codificar em base64url.</li>
-        <li>Montar URL final: <code>BASE_URL + "?payload=" + encoded</code>.</li>
+        <li>Generate valid JSON with a <code>candles</code> array.</li>
+        <li>Validate OHLC per candle: <code>low ≤ min(open,close)</code> and <code>high ≥ max(open,close)</code>.</li>
+        <li>Sort candles by ascending time.</li>
+        <li>Serialize JSON compactly.</li>
+        <li>Encode as base64url.</li>
+        <li>Build final URL: <code>BASE_URL + "?payload=" + encoded</code>.</li>
       </ol>
-      <p class="ok">Dica: evite payload gigantesco em query string. Se passar do limite do navegador/proxy, reduza candles.</p>
+      <p class="ok">Tip: avoid very large query strings. If browser/proxy limits are hit, reduce candle count.</p>
     </div>
 
-    <h2>6) Exemplo em JavaScript (Node/browser)</h2>
+    <h2>6) JavaScript example (Node/browser)</h2>
     <div class="card">
       <pre>const payload = {
   title: "WINJ26",
@@ -158,7 +157,7 @@
   ],
   grid: { vertical: true, horizontal: true },
   objects: [
-    { type: "buy-arrow", time: "2026-03-05T13:11:00Z", label: "Entrada" }
+    { type: "buy-arrow", time: "2026-03-05T13:11:00Z", label: "Entry" }
   ]
 }
 
@@ -168,7 +167,7 @@ const url = `http://localhost:5173/?payload=${b64url}`
 console.log(url)</pre>
     </div>
 
-    <h2>7) Exemplo em Python</h2>
+    <h2>7) Python example</h2>
     <div class="card">
       <pre>import json, base64
 
@@ -187,7 +186,7 @@ url = f"http://localhost:5173/?payload={b64url}"
 print(url)</pre>
     </div>
 
-    <h2>8) Exemplo em shell (jq + base64)</h2>
+    <h2>8) Shell example (jq + base64)</h2>
     <div class="card">
       <pre>PAYLOAD=$(jq -nc '{
   title:"WINJ26",
@@ -201,18 +200,18 @@ print(url)</pre>
 open "http://localhost:5173/?payload=${PAYLOAD}"</pre>
     </div>
 
-    <h2>9) Erros comuns</h2>
+    <h2>9) Common errors</h2>
     <div class="card">
       <ul>
-        <li><strong>“query param payload é obrigatório”</strong>: faltou <code>?payload=...</code>.</li>
-        <li><strong>“payload inválido”</strong>: codificação quebrada (base64/url-encoding inválido).</li>
-        <li><strong>“payload sem candles/candes”</strong>: JSON não possui array de candles.</li>
-        <li><strong>“candle[n] inválido”</strong>: OHLC/time não numéricos ou inconsistentes.</li>
+        <li><strong>“query param payload is required”</strong>: missing <code>?payload=...</code>.</li>
+        <li><strong>“invalid payload”</strong>: broken encoding (invalid base64 / URL encoding).</li>
+        <li><strong>“payload has no candles/candes array”</strong>: JSON has no candle array.</li>
+        <li><strong>“invalid candle[n]”</strong>: non-numeric or inconsistent OHLC/time.</li>
       </ul>
-      <p>Se você está automatizando com IA, sempre valide o JSON antes de montar a URL.</p>
+      <p>If you automate with AI, always validate JSON before generating the final URL.</p>
     </div>
 
-    <p style="margin-top:26px; color:#7f95ae;">Dica: acesse diretamente <span class="kbd">/help/</span> para abrir esta documentação.</p>
+    <p style="margin-top:26px; color:#7f95ae;">Direct link: <span class="kbd">/help/</span></p>
   </main>
 </body>
 </html>

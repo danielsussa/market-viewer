@@ -28,7 +28,7 @@ function showError(message) {
 }
 
 function decodePayload(raw) {
-  if (!raw || typeof raw !== 'string') throw new Error('query param "payload" é obrigatório')
+  if (!raw || typeof raw !== 'string') throw new Error('query param "payload" is required')
 
   const trimmed = raw.trim()
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) return trimmed
@@ -48,7 +48,7 @@ function decodePayload(raw) {
     }
   }
 
-  throw new Error('payload inválido: use JSON raw/url-encoded, base64 ou base64url')
+  throw new Error('invalid payload: use raw/url-encoded JSON, base64, or base64url')
 }
 
 function toUnixSec(value) {
@@ -82,7 +82,7 @@ function normalizeCandles(payload) {
       ? payload.candes
       : []
 
-  if (source.length === 0) throw new Error('payload sem candles/candes')
+  if (source.length === 0) throw new Error('payload has no candles/candes array')
 
   const defaultStart = Math.floor(Date.now() / 1000) - source.length * 60
   const rows = source.map((item, idx) => {
@@ -93,10 +93,10 @@ function normalizeCandles(payload) {
     const time = toUnixSec(item?.time) ?? defaultStart + idx * 60
 
     if (![open, high, low, close, time].every(Number.isFinite)) {
-      throw new Error(`candle[${idx}] inválido (ohlc/time)`)
+      throw new Error(`invalid candle[${idx}] (ohlc/time)`)
     }
     if (low > high || high < Math.max(open, close) || low > Math.min(open, close)) {
-      throw new Error(`candle[${idx}] com relação OHLC inválida`)
+      throw new Error(`candle[${idx}] has invalid OHLC relationship`)
     }
 
     return { time, open, high, low, close }
@@ -114,8 +114,8 @@ function resolveGridVisibility(payload) {
     if (typeof value === 'number') return value !== 0
     if (typeof value === 'string') {
       const v = value.trim().toLowerCase()
-      if (['1', 'true', 'yes', 'on', 'sim'].includes(v)) return true
-      if (['0', 'false', 'no', 'off', 'nao', 'não'].includes(v)) return false
+      if (['1', 'true', 'yes', 'on'].includes(v)) return true
+      if (['0', 'false', 'no', 'off'].includes(v)) return false
     }
     return null
   }
@@ -168,7 +168,7 @@ function positionThemeToggle(chart) {
   } catch {
     rightScaleWidth = 0
   }
-  // afasta do price scale/legenda da direita com base na largura real da escala
+  // Keep distance from right-side price scale labels using the actual scale width
   themeToggleEl.style.right = `${Math.round(rightScaleWidth + 16)}px`
 }
 
@@ -314,7 +314,7 @@ function renderObjects(payload, chart, series) {
       }
 
       if (obj.type === 'buy-arrow' || obj.type === 'sell-arrow') {
-        // setas agora são renderizadas pelo primitive nativo (Series Markers)
+        // Arrows are rendered by the native primitive (Series Markers)
         continue
       }
     }
@@ -398,7 +398,7 @@ function run() {
       width: Math.max(320, Math.floor(rect.width)),
       height: Math.max(320, Math.floor(rect.height)),
     })
-    // redraw no resize para manter objetos alinhados
+    // Redraw on resize to keep objects aligned
     if (objectsHandle && typeof objectsHandle.redraw === 'function') {
       objectsHandle.redraw()
     }
