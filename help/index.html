@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Viewer — Help</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --card: #111722;
+      --text: #d6e2f1;
+      --muted: #99aec7;
+      --accent: #79b8ff;
+      --ok: #80e7a3;
+      --border: #243244;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+    h1, h2, h3 { margin: 0 0 10px; line-height: 1.2; }
+    h1 { font-size: 28px; }
+    h2 { margin-top: 30px; font-size: 22px; }
+    h3 { margin-top: 20px; font-size: 17px; }
+    p, li { color: var(--muted); }
+    a { color: var(--accent); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      background: #1a2331;
+      border: 1px solid #2b3d55;
+      border-radius: 6px;
+      padding: 1px 5px;
+      color: #cde4ff;
+    }
+    pre {
+      overflow: auto;
+      margin: 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #2b3d55;
+      background: #0a1220;
+      color: #d8e5f5;
+    }
+    .ok { color: var(--ok); }
+    .kbd { border: 1px solid #3b526f; border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p><a href="/">← voltar para o chart</a></p>
+    <h1>Help: como gerar a URL do Market Viewer</h1>
+    <p>
+      Esta página explica o formato completo para montar o parâmetro
+      <code>?payload=...</code>. O objetivo é facilitar consumo por bots/agents de IA
+      que geram relatórios e snapshots de mercado.
+    </p>
+
+    <h2>1) Formato da URL</h2>
+    <div class="card">
+      <pre>https://SEU_DOMINIO/?payload=ENCODED_PAYLOAD</pre>
+      <p>
+        O app aceita payload em <strong>JSON raw</strong>, <strong>URL encoded</strong>,
+        <strong>base64</strong> ou <strong>base64url</strong>. Recomendado: base64url (mais robusto para query string).
+      </p>
+    </div>
+
+    <h2>2) Estrutura mínima do JSON</h2>
+    <div class="card">
+      <pre>{
+  "title": "WINJ26",
+  "candles": [
+    { "time": "2026-03-05T13:10:00Z", "open": 131150, "high": 131220, "low": 131120, "close": 131205 },
+    { "time": "2026-03-05T13:11:00Z", "open": 131205, "high": 131240, "low": 131180, "close": 131210 }
+  ]
+}</pre>
+      <ul>
+        <li><code>title</code> opcional (fallback: <code>symbol</code> ou “Market Viewer”).</li>
+        <li><code>candles</code> ou <code>candes</code> (ambos aceitos).</li>
+        <li>OHLC pode ser <code>open/high/low/close</code> ou <code>o/h/l/c</code>.</li>
+        <li><code>time</code> opcional: ISO, unix sec ou unix ms. Sem <code>time</code>, usa sequência por minuto.</li>
+      </ul>
+    </div>
+
+    <h2>3) Objetos extras (objects)</h2>
+    <div class="card">
+      <p>Tipos suportados:</p>
+      <ul>
+        <li><code>vertical-line</code> (linha vertical em um tempo)</li>
+        <li><code>horizontal-line</code> (linha horizontal em um preço)</li>
+        <li><code>text</code> (rótulo em <code>time+price</code> ou em <code>x+y</code>)</li>
+        <li><code>buy-arrow</code> / <code>sell-arrow</code> (setas nativas do chart)</li>
+      </ul>
+      <pre>{
+  "objects": [
+    { "type": "vertical-line", "time": "2026-03-05T13:10:00Z", "label": "Abertura NY", "color": "#ffcc00" },
+    { "type": "horizontal-line", "price": 131200, "label": "Nível", "color": "#78c8ff" },
+    { "type": "text", "text": "Zona de atenção", "time": "2026-03-05T13:18:00Z", "price": 131205 },
+    { "type": "buy-arrow", "time": "2026-03-05T13:18:00Z", "label": "Compra" },
+    { "type": "sell-arrow", "time": "2026-03-05T13:24:00Z", "label": "Venda" }
+  ]
+}</pre>
+    </div>
+
+    <h2>4) Receita para bots de IA (passo a passo)</h2>
+    <div class="card">
+      <ol>
+        <li>Gerar JSON válido com <code>candles</code>.</li>
+        <li>Validar OHLC por candle: <code>low ≤ min(open,close)</code> e <code>high ≥ max(open,close)</code>.</li>
+        <li>Ordenar candles por tempo crescente.</li>
+        <li>Serializar JSON sem quebras desnecessárias.</li>
+        <li>Codificar em base64url.</li>
+        <li>Montar URL final: <code>BASE_URL + "?payload=" + encoded</code>.</li>
+      </ol>
+      <p class="ok">Dica: evite payload gigantesco em query string. Se passar do limite do navegador/proxy, reduza candles.</p>
+    </div>
+
+    <h2>5) Exemplo em JavaScript (Node/browser)</h2>
+    <div class="card">
+      <pre>const payload = {
+  title: "WINJ26",
+  candles: [
+    { time: "2026-03-05T13:10:00Z", open: 131150, high: 131220, low: 131120, close: 131205 },
+    { time: "2026-03-05T13:11:00Z", open: 131205, high: 131240, low: 131180, close: 131210 }
+  ],
+  objects: [
+    { type: "buy-arrow", time: "2026-03-05T13:11:00Z", label: "Entrada" }
+  ]
+}
+
+const json = JSON.stringify(payload)
+const b64url = btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+const url = `http://localhost:5173/?payload=${b64url}`
+console.log(url)</pre>
+    </div>
+
+    <h2>6) Exemplo em Python</h2>
+    <div class="card">
+      <pre>import json, base64
+
+payload = {
+  "title": "WINJ26",
+  "candles": [
+    {"time": "2026-03-05T13:10:00Z", "open": 131150, "high": 131220, "low": 131120, "close": 131205},
+    {"time": "2026-03-05T13:11:00Z", "open": 131205, "high": 131240, "low": 131180, "close": 131210}
+  ]
+}
+
+raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+b64url = base64.urlsafe_b64encode(raw).decode("utf-8").rstrip("=")
+url = f"http://localhost:5173/?payload={b64url}"
+print(url)</pre>
+    </div>
+
+    <h2>7) Exemplo em shell (jq + base64)</h2>
+    <div class="card">
+      <pre>PAYLOAD=$(jq -nc '{
+  title:"WINJ26",
+  candles:[
+    {time:"2026-03-05T13:10:00Z",open:131150,high:131220,low:131120,close:131205},
+    {time:"2026-03-05T13:11:00Z",open:131205,high:131240,low:131180,close:131210}
+  ]
+}' | base64 | tr -d '\n' | tr '+/' '-_' | tr -d '=')
+
+open "http://localhost:5173/?payload=${PAYLOAD}"</pre>
+    </div>
+
+    <h2>8) Erros comuns</h2>
+    <div class="card">
+      <ul>
+        <li><strong>“query param payload é obrigatório”</strong>: faltou <code>?payload=...</code>.</li>
+        <li><strong>“payload inválido”</strong>: codificação quebrada (base64/url-encoding inválido).</li>
+        <li><strong>“payload sem candles/candes”</strong>: JSON não possui array de candles.</li>
+        <li><strong>“candle[n] inválido”</strong>: OHLC/time não numéricos ou inconsistentes.</li>
+      </ul>
+      <p>Se você está automatizando com IA, sempre valide o JSON antes de montar a URL.</p>
+    </div>
+
+    <p style="margin-top:26px; color:#7f95ae;">Atalho: clique em <span class="kbd">/help</span> na tela principal para abrir esta documentação.</p>
+  </main>
+</body>
+</html>

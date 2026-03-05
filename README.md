@@ -2,6 +2,11 @@
 
 Viewer de candles totalmente em frontend, sem backend.
 
+## Documentação para bots/IA
+
+- Acesse **`/help/`** para instruções completas de como gerar a URL com `?payload=...`.
+- A página inclui formato aceito, validações, erros comuns e exemplos em JavaScript, Python e shell.
+
 ## Stack
 
 - Vite
@@ -16,6 +21,8 @@ npm run dev
 ```
 
 Abra no navegador a URL do Vite com `?payload=...`.
+
+Também é possível abrir `http://localhost:5173/help/` para ver a documentação completa.
 
 ## Payload aceito
 
