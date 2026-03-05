@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Viewer</title>
+  <script type="module" src="/src/main.js"></script>
+</head>
+<body>
+  <main class="wrap">
+    <div id="error" class="error is-hidden"></div>
+    <div class="chart-shell">
+      <div id="chart" class="chart"></div>
+      <div id="objectsLayer" class="objects-layer"></div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false">
+        <span class="theme-toggle-track">
+          <span class="theme-toggle-knob"></span>
+        </span>
+      </button>
+      <div class="chart-head">
+        <div id="title" class="chart-title">Market Viewer</div>
+        <div id="subtitle" class="chart-subtitle"></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
