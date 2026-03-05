@@ -1,6 +1,11 @@
 import './style.css'
 import { CandlestickSeries, createChart, createSeriesMarkers } from 'lightweight-charts'
 
+if (window.location.pathname.endsWith('/help')) {
+  const target = `${window.location.pathname}/${window.location.search}${window.location.hash}`
+  window.location.replace(target)
+}
+
 const chartEl = document.getElementById('chart')
 const objectsLayerEl = document.getElementById('objectsLayer')
 const errorEl = document.getElementById('error')
