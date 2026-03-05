@@ -74,6 +74,7 @@
     <h2>1) URL format</h2>
     <div class="card">
       <pre>https://YOUR_DOMAIN/?payload=ENCODED_PAYLOAD</pre>
+      <p>GitHub Pages DNS for this project: <code>https://danielsussa.github.io/market-viewer/</code></p>
       <p>
         The app accepts payload as <strong>raw JSON</strong>, <strong>URL encoded</strong>,
         <strong>base64</strong>, or <strong>base64url</strong>. Recommended: base64url (safer for query strings).
@@ -132,6 +133,20 @@
         <li><code>gridVertical</code> and <code>gridHorizontal</code> at root level</li>
       </ul>
       <p>Accepted values: boolean, <code>1/0</code>, <code>true/false</code>, <code>yes/no</code>, <code>on/off</code>.</p>
+      <p>You can also control opacity and line style:</p>
+      <pre>{
+  "grid": {
+    "vertical": true,
+    "horizontal": true,
+    "opacity": 0.2,
+    "verticalOpacity": 0.35,
+    "horizontalOpacity": 0.15,
+    "style": "dashed",
+    "verticalStyle": "dotted",
+    "horizontalStyle": "solid"
+  }
+}</pre>
+      <p>Style values: <code>solid</code>, <code>dotted</code>, <code>dashed</code>, <code>large-dashed</code>, <code>sparse-dotted</code>.</p>
     </div>
 
     <h2>5) AI bot generation recipe</h2>

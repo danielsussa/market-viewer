@@ -1,5 +1,5 @@
 import './style.css'
-import { CandlestickSeries, createChart, createSeriesMarkers } from 'lightweight-charts'
+import { CandlestickSeries, LineStyle, createChart, createSeriesMarkers } from 'lightweight-charts'
 
 if (window.location.pathname.endsWith('/help')) {
   const target = `${window.location.pathname}/${window.location.search}${window.location.hash}`
@@ -131,6 +131,101 @@ function resolveGridVisibility(payload) {
   return {
     vertical: vertical ?? false,
     horizontal: horizontal ?? false,
+  }
+}
+
+function clamp01(value, fallback = 0.22) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return fallback
+  return Math.max(0, Math.min(1, n))
+}
+
+function withOpacity(color, opacity) {
+  const c = String(color || '#2b3a4a').trim()
+  const a = clamp01(opacity)
+
+  if (c.startsWith('#')) {
+    let hex = c.slice(1)
+    if (hex.length === 3) hex = hex.split('').map((ch) => ch + ch).join('')
+    if (hex.length === 6) {
+      const r = Number.parseInt(hex.slice(0, 2), 16)
+      const g = Number.parseInt(hex.slice(2, 4), 16)
+      const b = Number.parseInt(hex.slice(4, 6), 16)
+      return `rgba(${r}, ${g}, ${b}, ${a})`
+    }
+  }
+
+  const rgb = c.match(/^rgba?\(([^)]+)\)$/i)
+  if (rgb) {
+    const parts = rgb[1].split(',').map((v) => v.trim())
+    if (parts.length >= 3) {
+      return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${a})`
+    }
+  }
+
+  return c
+}
+
+function parseLineStyle(value, fallback = LineStyle.Solid) {
+  if (Number.isFinite(Number(value))) {
+    const n = Number(value)
+    if ([0, 1, 2, 3, 4].includes(n)) return n
+  }
+
+  if (typeof value !== 'string') return fallback
+  const v = value.trim().toLowerCase()
+
+  if (['solid'].includes(v)) return LineStyle.Solid
+  if (['dotted', 'dot', 'pontilhado'].includes(v)) return LineStyle.Dotted
+  if (['dashed', 'dash', 'tracejado'].includes(v)) return LineStyle.Dashed
+  if (['large-dashed', 'largedashed', 'big-dashed'].includes(v)) return LineStyle.LargeDashed
+  if (['sparse-dotted', 'sparsedotted'].includes(v)) return LineStyle.SparseDotted
+
+  return fallback
+}
+
+function resolveGridOptions(payload) {
+  const grid = payload?.grid && typeof payload.grid === 'object' ? payload.grid : {}
+  const visibility = resolveGridVisibility(payload)
+
+  const defaultColor = '#2b3a4a'
+  const baseVerticalColor = grid.verticalColor || grid.vertColor || grid.color || defaultColor
+  const baseHorizontalColor = grid.horizontalColor || grid.horzColor || grid.color || defaultColor
+
+  const verticalOpacity = clamp01(grid.verticalOpacity ?? grid.opacity ?? 0.24)
+  const horizontalOpacity = clamp01(grid.horizontalOpacity ?? grid.opacity ?? 0.24)
+
+  const dashed = grid.dashed
+  const verticalDashed = grid.verticalDashed
+  const horizontalDashed = grid.horizontalDashed
+
+  const globalStyle = grid.style
+  const verticalStyle = grid.verticalStyle
+  const horizontalStyle = grid.horizontalStyle
+
+  const resolvedVerticalStyle = parseLineStyle(
+    verticalStyle ?? (verticalDashed === true ? 'dashed' : verticalDashed === false ? 'solid' : undefined) ??
+      (dashed === true ? 'dashed' : dashed === false ? 'solid' : undefined) ?? globalStyle,
+    LineStyle.Solid,
+  )
+
+  const resolvedHorizontalStyle = parseLineStyle(
+    horizontalStyle ?? (horizontalDashed === true ? 'dashed' : horizontalDashed === false ? 'solid' : undefined) ??
+      (dashed === true ? 'dashed' : dashed === false ? 'solid' : undefined) ?? globalStyle,
+    LineStyle.Solid,
+  )
+
+  return {
+    vertLines: {
+      visible: visibility.vertical,
+      color: withOpacity(baseVerticalColor, verticalOpacity),
+      style: resolvedVerticalStyle,
+    },
+    horzLines: {
+      visible: visibility.horizontal,
+      color: withOpacity(baseHorizontalColor, horizontalOpacity),
+      style: resolvedHorizontalStyle,
+    },
   }
 }
 
@@ -341,7 +436,7 @@ function run() {
   const payload = JSON.parse(decoded)
 
   const rows = normalizeCandles(payload)
-  const gridVisibility = resolveGridVisibility(payload)
+  const gridOptions = resolveGridOptions(payload)
 
   const title = String(payload?.title || payload?.symbol || 'Market Viewer')
   titleEl.textContent = title
@@ -351,10 +446,7 @@ function run() {
     width: Math.max(320, chartEl.clientWidth),
     height: Math.max(320, chartEl.clientHeight),
     layout: { background: { color: '#0b0f14' }, textColor: '#b8c7da' },
-    grid: {
-      vertLines: { visible: gridVisibility.vertical },
-      horzLines: { visible: gridVisibility.horizontal },
-    },
+    grid: gridOptions,
     crosshair: {
       vertLine: {
         color: 'rgba(184, 199, 218, 0.18)',

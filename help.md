@@ -8,6 +8,12 @@ This guide explains how to generate a Market Viewer URL using `?payload=...`.
 https://YOUR_DOMAIN/?payload=ENCODED_PAYLOAD
 ```
 
+GitHub Pages DNS for this project:
+
+```text
+https://danielsussa.github.io/market-viewer/
+```
+
 Accepted payload encodings:
 - raw JSON
 - URL encoded JSON
@@ -71,6 +77,25 @@ Aliases also supported:
 - `gridVertical`, `gridHorizontal` at root level
 
 Accepted values: boolean, `1/0`, `true/false`, `yes/no`, `on/off`.
+
+You can also control opacity and line style:
+
+```json
+{
+  "grid": {
+    "vertical": true,
+    "horizontal": true,
+    "opacity": 0.2,
+    "verticalOpacity": 0.35,
+    "horizontalOpacity": 0.15,
+    "style": "dashed",
+    "verticalStyle": "dotted",
+    "horizontalStyle": "solid"
+  }
+}
+```
+
+Style values: `solid`, `dotted`, `dashed`, `large-dashed`, `sparse-dotted`.
 
 ## 5) AI bot recipe
 
