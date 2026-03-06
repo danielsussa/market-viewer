@@ -24,6 +24,26 @@ Then open the Vite URL with `?payload=...`.
 
 You can also open `http://localhost:5173/help/` for the complete documentation.
 
+## Export image via query params (PNG/JPG)
+
+You can trigger automatic export on page load (no UI button):
+
+- `export=png` or `export=jpg` (also accepts `jpeg`)
+- `download=1|0` (default: `1`)
+- `filename=your-name` (optional, extension is added automatically)
+- `quality=0..1` (optional, JPG only; default `0.92`)
+- `exportDelay=ms` (optional, wait before capture; default `120`)
+
+Example:
+
+```bash
+open "http://localhost:5173/?payload=${PAYLOAD}&export=png&download=1&filename=winj26"
+```
+
+```bash
+open "http://localhost:5173/?payload=${PAYLOAD}&export=jpg&download=1&quality=0.9&filename=winj26"
+```
+
 ## Accepted payload
 
 Compatible with this format:

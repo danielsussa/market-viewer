@@ -7,6 +7,7 @@ if (window.location.pathname.endsWith('/help')) {
 }
 
 const chartEl = document.getElementById('chart')
+const chartShellEl = document.querySelector('.chart-shell')
 const objectsLayerEl = document.getElementById('objectsLayer')
 const errorEl = document.getElementById('error')
 const titleEl = document.getElementById('title')
@@ -428,6 +429,216 @@ function renderObjects(payload, chart, series) {
   }
 }
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function parseBooleanParam(value, fallback) {
+  if (value == null) return fallback
+  if (typeof value !== 'string') return fallback
+  const v = value.trim().toLowerCase()
+  if (['1', 'true', 'yes', 'on'].includes(v)) return true
+  if (['0', 'false', 'no', 'off'].includes(v)) return false
+  return fallback
+}
+
+function sanitizeFilename(value) {
+  const raw = String(value || 'market-viewer').trim() || 'market-viewer'
+  return raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'market-viewer'
+}
+
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2))
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.arcTo(x + width, y, x + width, y + height, r)
+  ctx.arcTo(x + width, y + height, x, y + height, r)
+  ctx.arcTo(x, y + height, x, y, r)
+  ctx.arcTo(x, y, x + width, y, r)
+  ctx.closePath()
+}
+
+function drawLineWithLabel(ctx, lineEl, isVertical) {
+  const lineStyle = getComputedStyle(lineEl)
+  const x = Number.parseFloat(lineEl.style.left || '0')
+  const y = Number.parseFloat(lineEl.style.top || '0')
+
+  if (isVertical) {
+    const width = Math.max(1, Number.parseFloat(lineEl.style.width || lineStyle.width || '1'))
+    ctx.fillStyle = lineStyle.backgroundColor || 'rgba(255,255,255,0.9)'
+    ctx.fillRect(Math.round(x), 0, width, ctx.canvas.height)
+  } else {
+    const height = Math.max(1, Number.parseFloat(lineEl.style.height || lineStyle.height || '1'))
+    ctx.fillStyle = lineStyle.backgroundColor || 'rgba(255,255,255,0.9)'
+    ctx.fillRect(0, Math.round(y), ctx.canvas.width, height)
+  }
+
+  const labelEl = lineEl.querySelector(isVertical ? '.obj-vline-label' : '.obj-hline-label')
+  if (!labelEl) return
+  const ls = getComputedStyle(labelEl)
+  const rect = labelEl.getBoundingClientRect()
+  const rootRect = objectsLayerEl.getBoundingClientRect()
+  const lx = rect.left - rootRect.left
+  const ly = rect.top - rootRect.top
+  ctx.save()
+  ctx.fillStyle = ls.backgroundColor || 'rgba(0,0,0,0.5)'
+  drawRoundedRect(ctx, lx, ly, rect.width, rect.height, 4)
+  ctx.fill()
+  ctx.fillStyle = ls.color || '#fff'
+  ctx.font = `${ls.fontWeight} ${ls.fontSize} ${ls.fontFamily}`
+  ctx.textBaseline = 'middle'
+  ctx.fillText(labelEl.textContent || '', lx + 6, ly + rect.height / 2)
+  ctx.restore()
+}
+
+function drawTextObjects(ctx) {
+  const textEls = objectsLayerEl.querySelectorAll('.obj-text')
+  const rootRect = objectsLayerEl.getBoundingClientRect()
+  for (const el of textEls) {
+    const style = getComputedStyle(el)
+    const rect = el.getBoundingClientRect()
+    const x = rect.left - rootRect.left
+    const y = rect.top - rootRect.top
+    ctx.save()
+    ctx.fillStyle = style.backgroundColor || 'rgba(0,0,0,0.5)'
+    drawRoundedRect(ctx, x, y, rect.width, rect.height, 6)
+    ctx.fill()
+    ctx.fillStyle = style.color || '#fff'
+    ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+    ctx.textBaseline = 'middle'
+    const paddingX = Number.parseFloat(style.paddingLeft || '8')
+    ctx.fillText(el.textContent || '', x + paddingX, y + rect.height / 2)
+    ctx.restore()
+  }
+}
+
+function drawChartHeader(ctx) {
+  const headEl = document.querySelector('.chart-head')
+  if (!headEl) return
+  const headStyle = getComputedStyle(headEl)
+  const rootRect = chartShellEl.getBoundingClientRect()
+  const rect = headEl.getBoundingClientRect()
+  const x = rect.left - rootRect.left
+  const y = rect.top - rootRect.top
+
+  ctx.save()
+  ctx.fillStyle = headStyle.backgroundColor || 'rgba(11,15,20,0.45)'
+  drawRoundedRect(ctx, x, y, rect.width, rect.height, 6)
+  ctx.fill()
+
+  const titleStyle = getComputedStyle(titleEl)
+  const subtitleStyle = getComputedStyle(subtitleEl)
+
+  const paddingLeft = Number.parseFloat(headStyle.paddingLeft || '8')
+  const paddingTop = Number.parseFloat(headStyle.paddingTop || '4')
+  const gap = Number.parseFloat(headStyle.rowGap || headStyle.gap || '2')
+
+  ctx.fillStyle = titleStyle.color || '#d6e2f0'
+  ctx.font = `${titleStyle.fontWeight} ${titleStyle.fontSize} ${titleStyle.fontFamily}`
+  ctx.textBaseline = 'top'
+  const tx = x + paddingLeft
+  const ty = y + paddingTop
+  ctx.fillText(titleEl.textContent || '', tx, ty)
+
+  const titleHeight = Number.parseFloat(titleStyle.lineHeight)
+    || Number.parseFloat(titleStyle.fontSize || '14')
+
+  if (subtitleEl.textContent) {
+    ctx.fillStyle = subtitleStyle.color || '#b8c7da'
+    ctx.font = `${subtitleStyle.fontWeight} ${subtitleStyle.fontSize} ${subtitleStyle.fontFamily}`
+    ctx.fillText(subtitleEl.textContent || '', tx, ty + titleHeight + gap)
+  }
+
+  ctx.restore()
+}
+
+async function renderSnapshotCanvas() {
+  const width = Math.max(1, Math.floor(chartShellEl.clientWidth))
+  const height = Math.max(1, Math.floor(chartShellEl.clientHeight))
+  const scale = Math.max(1, Math.min(3, window.devicePixelRatio || 1))
+
+  const out = document.createElement('canvas')
+  out.width = Math.floor(width * scale)
+  out.height = Math.floor(height * scale)
+
+  const ctx = out.getContext('2d')
+  ctx.scale(scale, scale)
+
+  const bodyStyle = getComputedStyle(document.body)
+  ctx.fillStyle = bodyStyle.backgroundColor || '#0b0f14'
+  ctx.fillRect(0, 0, width, height)
+
+  const shellRect = chartShellEl.getBoundingClientRect()
+  const chartCanvases = chartEl.querySelectorAll('canvas')
+  for (const canvas of chartCanvases) {
+    const rect = canvas.getBoundingClientRect()
+    const x = rect.left - shellRect.left
+    const y = rect.top - shellRect.top
+    if (rect.width <= 0 || rect.height <= 0) continue
+    ctx.drawImage(canvas, x, y, rect.width, rect.height)
+  }
+
+  const verticalLines = objectsLayerEl.querySelectorAll('.obj-vline')
+  for (const line of verticalLines) drawLineWithLabel(ctx, line, true)
+
+  const horizontalLines = objectsLayerEl.querySelectorAll('.obj-hline')
+  for (const line of horizontalLines) drawLineWithLabel(ctx, line, false)
+
+  drawTextObjects(ctx)
+  drawChartHeader(ctx)
+
+  return out
+}
+
+async function maybeExportFromQuery() {
+  const params = new URLSearchParams(window.location.search)
+  const exportFmtRaw = String(params.get('export') || '').trim().toLowerCase()
+  if (!exportFmtRaw) return
+
+  const format = exportFmtRaw === 'jpeg' ? 'jpg' : exportFmtRaw
+  if (!['png', 'jpg'].includes(format)) {
+    throw new Error('invalid export format: use export=png or export=jpg')
+  }
+
+  const delayMs = Math.max(0, Number(params.get('exportDelay') || 120) || 120)
+  await wait(delayMs)
+
+  const qualityNum = Number(params.get('quality'))
+  const quality = Number.isFinite(qualityNum) ? Math.max(0, Math.min(1, qualityNum)) : 0.92
+  const mime = format === 'png' ? 'image/png' : 'image/jpeg'
+  const download = parseBooleanParam(params.get('download'), true)
+
+  const titlePart = sanitizeFilename(titleEl.textContent)
+  const rawFileName = params.get('filename') || `${titlePart || 'market-viewer'}-${Date.now()}`
+  const fileName = `${sanitizeFilename(rawFileName)}.${format}`
+
+  const snapshot = await renderSnapshotCanvas()
+  const dataUrl = format === 'png'
+    ? snapshot.toDataURL(mime)
+    : snapshot.toDataURL(mime, quality)
+
+  if (download) {
+    const link = document.createElement('a')
+    link.href = dataUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  }
+
+  window.__MARKET_VIEWER_EXPORT__ = {
+    format,
+    mime,
+    fileName,
+    dataUrl,
+  }
+}
+
 function run() {
   const params = new URLSearchParams(window.location.search)
   const raw = params.get('payload')
@@ -502,6 +713,10 @@ function run() {
     positionThemeToggle(chart)
   })
   ro.observe(chartEl)
+
+  maybeExportFromQuery().catch((err) => {
+    showError(err?.message || String(err))
+  })
 }
 
 try {

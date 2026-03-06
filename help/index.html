@@ -98,6 +98,23 @@
       </ul>
     </div>
 
+    <h2>2.1) Auto export via query params (PNG/JPG)</h2>
+    <div class="card">
+      <p>You can export the current chart image automatically on load (no UI button needed):</p>
+      <ul>
+        <li><code>export=png</code> or <code>export=jpg</code> (also accepts <code>jpeg</code>)</li>
+        <li><code>download=1|0</code> (default: <code>1</code>)</li>
+        <li><code>filename=your-name</code> (optional, extension is added automatically)</li>
+        <li><code>quality=0..1</code> (optional, JPG only; default <code>0.92</code>)</li>
+        <li><code>exportDelay=ms</code> (optional, delay before capture; default <code>120</code>)</li>
+      </ul>
+      <pre>https://YOUR_DOMAIN/?payload=ENCODED_PAYLOAD&export=png&download=1&filename=snapshot</pre>
+      <p>
+        The export snapshot includes chart canvas + overlays (<code>objects</code>) + header
+        (title/subtitle), matching the current theme rendered on screen.
+      </p>
+    </div>
+
     <h2>3) Overlay objects (objects)</h2>
     <div class="card">
       <p>Supported types:</p>
