@@ -5,7 +5,7 @@ This guide explains how to generate a Market Viewer URL using `?payload=...`.
 ## 1) URL format
 
 ```text
-https://YOUR_DOMAIN/?payload=ENCODED_PAYLOAD
+https://danielsussa.github.io/market-viewer/?payload=ENCODED_PAYLOAD
 ```
 
 GitHub Pages DNS for this project:
@@ -58,7 +58,7 @@ Supported URL params (in addition to `payload`):
 Example:
 
 ```text
-https://YOUR_DOMAIN/?payload=ENCODED_PAYLOAD&export=png&download=1&filename=snapshot
+https://danielsussa.github.io/market-viewer/?payload=ENCODED_PAYLOAD&export=png&download=1&filename=snapshot
 ```
 
 Export behavior:
